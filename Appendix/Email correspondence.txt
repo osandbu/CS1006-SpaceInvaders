@@ -1,0 +1,54 @@
+Subject: Sound problem
+-------------------------------------------
+From: Ole Sandbu <os75@st-andrews.ac.uk>
+Date: 22 March 2010 12:01
+To: ianm@cs.st-andrews.ac.uk
+-------------------------------------------
+
+Hello,
+
+Attached is the source code for playing sounds, including the sounds and a test class.
+
+Thank you in advance,
+Ole
+
+-------------------------------------------
+From: Ian Miguel <ianm@cs.st-andrews.ac.uk>
+Date: 22 March 2010 15:31
+To: Ole Sandbu <os75@st-andrews.ac.uk>
+
+-------------------------------------------
+
+The problem is caused by the fact that, in playing the sound, you have gone through the 
+input stream and are now at the end. So, when you ask it to play again it thinks there
+is nothing left to play.
+
+In theory, you should be able to go back to the start using mark() and reset() (if this
+kind of stream supports them) - but this makes some assumptions about you having
+the whole file in memory, which you may not be able to rely upon.
+
+I think a safer bet would be to have an intermediate stage: initialise by reading in the
+file into some array, then (if possible) initialising a stream based on that array every time you
+want to play the sound - or indeed using mark and reset since you know you have it all
+in memory.
+
+Here's some code or reference that reads a file of chars that I have lying around:
+
+    File f = new File(fn) ;
+    ln = (int)f.length() ;
+    System.out.println("Reading "+fn+", "+ln+" chars") ;
+    file = new char[ln] ;
+    try {
+      FileReader fr = new FileReader(fn);
+      fr.read(file,0,ln) ;
+	fr.close() ;
+	}
+...
+
+Another possibility would be to build your read on top of a RandomAccessFile, which
+allows you to seek - but I'm not sure that that would be much more efficient than what
+you are doing.
+
+Hope this helps, If I come across a better way I'll let you know.
+
+Ian.
